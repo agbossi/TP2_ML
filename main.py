@@ -3,6 +3,7 @@ import os
 import pandas as pd
 
 from Data_resamplers import train_test_split
+from Metrics import ConfusionMatrix
 from Tree import Tree
 
 path = os.path.abspath('Data/german_credit.csv')
@@ -32,8 +33,12 @@ training_percent = 0.7
 sets = train_test_split(df, training_percent)[0]
 decision_tree = Tree()
 decision_tree.train(sets[0])
-decision_tree.test(sets[1])
+classifications = decision_tree.test(sets[1])
+confusion_matrix = ConfusionMatrix(2)
 
+for i in range(len(sets[1])):
+    test_element = sets[1].iloc[i, :]
+    confusion_matrix.add_entry(test_element[decision_tree.get_class_column()], classifications[i])
 
 
 

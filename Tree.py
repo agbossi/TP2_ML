@@ -52,6 +52,9 @@ class Tree:
         self.root = None
         self.class_column = None
 
+    def get_class_column(self):
+        return self.class_column
+
     def build_attr_dict(self):
         dict = {attribute: self.training_set[attribute].unique() for attribute in self.training_set.columns}
         del dict[self.class_column]
@@ -63,11 +66,13 @@ class Tree:
         self.attribute_dictionary = self.build_attr_dict()
         self.root = self.build_tree(self.root, self.training_set)
 
+    # {elem-index -> class} y test_elem[-1] como clase real por otro
     def test(self, test_set):
         classifications = {}
         for i in range(len(test_set)):
             test_element = test_set.iloc[i, :]
             classifications[i] = self.traverse_tree(self.root, test_element)
+
         return classifications
 
     def traverse_tree(self, curr_node, element):
