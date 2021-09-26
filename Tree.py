@@ -1,6 +1,8 @@
 import enum
 import math
+import sys
 
+INITIAL_DEPTH = 0
 
 def entropy(data_set):
     entropy = 0
@@ -43,6 +45,7 @@ class Node:
 
 # clase que me genera un arbol el cual parte una raíz
 class Tree:
+
     def __init__(self):
         self.variables = None
         self.filters = {}
@@ -51,20 +54,28 @@ class Tree:
         self.training_set = None
         self.root = None
         self.class_column = None
+        self.max_depth = None
+        self.min_elements_for_fork = None
+        self.nodes = 0
 
     def get_class_column(self):
         return self.class_column
+
+    def get_node_amount(self):
+        return self.nodes
 
     def build_attr_dict(self):
         dict = {attribute: self.training_set[attribute].unique() for attribute in self.training_set.columns}
         del dict[self.class_column]
         return dict
 
-    def train(self, data_set):
+    def train(self, data_set, max_depth=sys.maxsize, min_elements_for_fork=1):
+        self.max_depth = max_depth
+        self.min_elements_for_fork = min_elements_for_fork
         self.training_set = data_set
         self.class_column = data_set.columns[-1]
         self.attribute_dictionary = self.build_attr_dict()
-        self.root = self.build_tree(self.root, self.training_set)
+        self.root = self.build_tree(self.root, self.training_set, INITIAL_DEPTH)
 
     # {elem-index -> class} y test_elem[-1] como clase real por otro
     def test(self, test_set):
@@ -104,7 +115,7 @@ class Tree:
             attr_entropy += frequency(data_set, attr, value) * entropy(data_set[(data_set[attr] == value)])
         return entropy(data_set) - attr_entropy
 
-    def build_tree(self, curr_node, data_set):
+    def build_tree(self, curr_node, data_set, current_depth):
         if curr_node is None:
             # vengo de node attr
             next_attr = self.get_next_attribute(data_set)
@@ -114,31 +125,37 @@ class Tree:
                 del self.attribute_dictionary[next_attr]
                 # curr_node es un nodo atributo con sus values como nodos hijos
                 for node in curr_node.children:
-                    self.build_tree(node, data_set[(data_set[next_attr] == node.value)])
+                    self.build_tree(node, data_set[(data_set[next_attr] == node.value)], current_depth+1)
             else:
                 # ya use todos los atributos
                 classified, class_value = self.can_classify(data_set, force_classification=True)
+                self.nodes += 1
                 return Node(NodeType.classification, class_value)
         else:
             # estoy en un nodo value
-            classified, class_value = self.can_classify(data_set)
+            # en el checkeo de profundidad tengo que tener en cuenta que si no fuerzo aca, voy a tener
+            # un nodo atributo y sus nodos valores (2 niveles de profundidad) mas
+            force_classification = (self.max_depth - 2 < current_depth or len(data_set.index) < self.min_elements_for_fork)
+            classified, class_value = self.can_classify(data_set, force_classification)
             if not classified:
-                curr_node.add_child(self.build_tree(None, data_set))
+                curr_node.add_child(self.build_tree(None, data_set, current_depth+1))
             else:
                 curr_node.add_child(Node(NodeType.classification, class_value))
+                self.nodes += 1
 
         return curr_node
 
     def build_attribute_sub_tree(self, attribute):
         attribute_root = Node(NodeType.attribute, attribute)
+        self.nodes += 1
         for value in self.attribute_dictionary[attribute]:
             attribute_root.add_child(Node(NodeType.value, value))
+            self.nodes += 1
         return attribute_root
 
     # devuelve si pudo clasificar los datos y su clasificacion en caso de poder. None sino
     def can_classify(self, data_set, force_classification=False):
-        class_column = data_set.columns[-1]
-        frequency_dict = data_set[class_column].value_counts().to_dict()
+        frequency_dict = data_set[self.class_column].value_counts().to_dict()
         if len(frequency_dict) == 1:
             # todos los ejemplos son de la misma clase, estoy en condiciones de clasificar
             return True, list(frequency_dict.keys())[0]  # la unica clase

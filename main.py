@@ -5,6 +5,7 @@ import pandas as pd
 from Data_resamplers import train_test_split
 from Metrics import ConfusionMatrix
 from Tree import Tree
+from Stat_analysis import histogram as hist
 
 path = os.path.abspath('Data/german_credit.csv')
 df = pd.read_csv(path)
@@ -25,6 +26,10 @@ df.drop('Occupation', inplace=True, axis=1)
 df.drop('No of dependents', inplace=True, axis=1)
 df.drop('Telephone', inplace=True, axis=1)
 df.drop('Foreign Worker', inplace=True, axis=1)
+
+# col = 'Age (years)'
+# xticks = [i for i in range(20, 80, 5)]
+# hist(pd.DataFrame(data=df[col], columns=[col]), column=col, xticks=xticks)
 
 class_column = df.pop('Creditability')
 df.insert(len(df.columns), 'Creditability', class_column)
