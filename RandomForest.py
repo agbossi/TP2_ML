@@ -1,23 +1,27 @@
 from Tree import Tree
 import random
+import pandas as pd
 
 
-def random_forest(data_set, sample_size, num_trees, ):
+def random_forest(data_set, sample_size, num_trees):
     forest = []
     for i in range(num_trees):
         sample = get_sample(data_set, sample_size)
-        # forest.append(Tree.build_tree(None, sample, 0)) -> revisar, recibe dict ?
+        forest.append(Tree.build_tree(None, sample, 0))
     return forest
 
 
 def get_sample(data_set, sample_size):
-    sample = {}
+    sampler = {}
     for key in data_set.keys():
-        sample[key] = []
+        sampler[key] = []
     for i in range(sample_size):
         random_element = get_element(data_set, sample_size)
         for key in random_element.keys():
-            sample[key].append(random_element[key])
+            sampler[key].append(random_element[key])
+    data_items = sampler.items()
+    data_list = list(data_items)
+    sample = pd.DataFrame(data_list)
     return sample
 
 
