@@ -5,6 +5,7 @@ import pandas as pd
 from Data_resamplers import train_test_split
 from Metrics import ConfusionMatrix
 from Tree import Tree
+import RandomForest
 from Stat_analysis import histogram as hist
 
 path = os.path.abspath('Data/german_credit.csv')
@@ -38,6 +39,8 @@ training_percent = 0.7
 sets = train_test_split(df, training_percent)[0]
 decision_tree = Tree()
 decision_tree.train(sets[0])
+
+forest = RandomForest.random_forest(sets[0], 50, 50)
 classifications = decision_tree.test(sets[1])
 confusion_matrix = ConfusionMatrix(2)
 

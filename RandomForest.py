@@ -7,7 +7,8 @@ def random_forest(data_set, sample_size, num_trees):
     forest = []
     for i in range(num_trees):
         sample = get_sample(data_set, sample_size)
-        forest.append(Tree.build_tree(None, sample, 0))
+        decision_tree = Tree()
+        forest.append(decision_tree.train(sample))
     return forest
 
 
