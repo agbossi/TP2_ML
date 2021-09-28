@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from knn import euclidean_distance_from
+from Metrics import ConfusionMatrix
 
 from sklearn.model_selection import train_test_split
 
@@ -48,7 +48,7 @@ def classify(training, test, kay, weight):
             s = s + 1
             print(s)
         output.append(winner[0])
-    print(np.array(output))
+    return output
 
 
 def classify_element(training, test_element, kay, weight):
@@ -69,6 +69,16 @@ def classify_element(training, test_element, kay, weight):
     return winner
 
 
-classify(list_train, list_test, 5, 1)
-print(y_test)
-
+classifications = classify(list_train, list_test, 5, 1)
+confusion_matrix = ConfusionMatrix(['1', '2', '3', '4', '5'])
+for i in range(len(classifications)):
+    confusion_matrix.add_entry(y_test[i], classifications[i])
+confusion_matrix.summarize()
+print('recalls')
+confusion_matrix.get_recalls()
+print('precisions')
+confusion_matrix.get_precisions()
+print('accuracies')
+confusion_matrix.get_accuracies()
+print('f1')
+confusion_matrix.get_f1_scores()
