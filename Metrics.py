@@ -164,14 +164,23 @@ class ConfusionMatrix:
     def get_summary(self):
         return self.stats_matrix
 
-    def get_s(self):
+    def get_all_s(self):
         if self.stats_matrix is None:
             self.summarize()
-        return self.stats_matrix[MatrixComponents.true_positive.value] / \
-               (self.stats_matrix[MatrixComponents.true_positive.value]
-                + self.stats_matrix[MatrixComponents.false_positive.value]
-                + self.stats_matrix[MatrixComponents.false_negative.value]
-                + self.stats_matrix[MatrixComponents.true_negative.value])
+        ss = []
+        for i in range(len(self.classifications)):
+            s = [self.classifications[i], self.get_s(i)]  # paso la linea con texto
+            ss.append(s)
+        return ss
+
+    def get_s(self, index):
+        if self.stats_matrix is None:
+            self.summarize()
+        return self.stats_matrix[index][MatrixComponents.true_positive.value] / \
+               (self.stats_matrix[index][MatrixComponents.true_positive.value]
+                + self.stats_matrix[index][MatrixComponents.false_positive.value]
+                + self.stats_matrix[index][MatrixComponents.false_negative.value]
+                + self.stats_matrix[index][MatrixComponents.true_negative.value])
 
 
 POSITIVE = 0

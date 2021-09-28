@@ -72,8 +72,11 @@ def classify_element(training, test_element, kay, weight):
 classifications = classify(list_train, list_test, 5, 1)
 confusion_matrix = ConfusionMatrix(['1', '2', '3', '4', '5'])
 for i in range(len(classifications)):
-    confusion_matrix.add_entry(y_test[i], classifications[i])
+    if classifications[i] is not None:
+        confusion_matrix.add_entry(y_test[i], classifications[i])
 confusion_matrix.summarize()
+print('s')
+confusion_matrix.get_all_s()
 print('recalls')
 confusion_matrix.get_recalls()
 print('precisions')
