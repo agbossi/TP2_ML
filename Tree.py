@@ -4,6 +4,7 @@ import sys
 
 INITIAL_DEPTH = 0
 
+
 def entropy(data_set):
     entropy = 0
     class_column = data_set.columns[-1]
@@ -22,6 +23,7 @@ class NodeType(enum.Enum):
     attribute = 0
     value = 1
     classification = 2
+
 
 # Clase nodo donde se define cada uno de los nodos que voy a tener. Un nodo puede ser  nodeType:(atributo o valor) y
 # value: (Clase, etc. o 1,2,3, etc.), para cada atributo le van a corresponder sus respectivos valores
@@ -54,8 +56,11 @@ class Tree:
         self.training_set = None
         self.root = None
         self.class_column = None
-        self.max_depth = None
+        self.max_test_depth = None
+        self.max_build_depth = None
+        self.tree_depth = 0
         self.min_elements_for_fork = None
+        self.max_nodes = None
         self.nodes = 0
 
     def get_class_column(self):
@@ -64,40 +69,47 @@ class Tree:
     def get_node_amount(self):
         return self.nodes
 
-    def build_attr_dict(self):
-        dict = {attribute: self.training_set[attribute].unique() for attribute in self.training_set.columns}
-        del dict[self.class_column]
-        return dict
+    def get_tree_depth(self):
+        return self.tree_depth
 
-    def train(self, data_set, max_depth=sys.maxsize, min_elements_for_fork=1):
-        self.max_depth = max_depth
+    def build_attr_dict(self):
+        dic = {attribute: self.training_set[attribute].unique() for attribute in self.training_set.columns}
+        del dic[self.class_column]
+        return dic
+
+    def train(self, data_set, max_depth=sys.maxsize, min_elements_for_fork=1, max_nodes=sys.maxsize):
+        self.max_build_depth = max_depth
         self.min_elements_for_fork = min_elements_for_fork
         self.training_set = data_set
         self.class_column = data_set.columns[-1]
         self.attribute_dictionary = self.build_attr_dict()
+        self.max_nodes = max_nodes
         self.root = self.build_tree(self.root, self.training_set, INITIAL_DEPTH)
 
     # {elem-index -> class} y test_elem[-1] como clase real por otro
-    def test(self, test_set):
+    def test(self, test_set, depth=sys.maxsize):
+        self.max_test_depth = depth
         classifications = {}
         for i in range(len(test_set)):
             test_element = test_set.iloc[i, :]
-            classifications[i] = self.traverse_tree(self.root, test_element)
+            classifications[i] = self.traverse_tree(self.root, test_element, INITIAL_DEPTH)
 
         return classifications
 
-    def traverse_tree(self, curr_node, element):
+    def traverse_tree(self, curr_node, element, current_depth):
         if curr_node.nodeType == NodeType.classification:
             return curr_node.value
         if curr_node.nodeType == NodeType.attribute:
             element_value = element[curr_node.value]
             for child in curr_node.children:
                 if child.value == element_value:
-                    return self.traverse_tree(child, element)
+                    return self.traverse_tree(child, element, current_depth+1)
             raise Exception("training set does not have value ", element_value, " for attribute ", curr_node.value)
         else:
             # nodo de tipo value, solo puede tener como hijo a un siguiente attr
-            return self.traverse_tree(curr_node.children[0], element)
+            #if current_depth > self.max_test_depth - 1:
+            #    self.can_classify()
+            return self.traverse_tree(curr_node.children[0], element, current_depth+1)
 
     def get_next_attribute(self, data_set):
         max_gain = 0
@@ -116,6 +128,8 @@ class Tree:
         return entropy(data_set) - attr_entropy
 
     def build_tree(self, curr_node, data_set, current_depth):
+        if current_depth > self.tree_depth:
+            self.tree_depth = current_depth
         if curr_node is None:
             # vengo de node attr
             next_attr = self.get_next_attribute(data_set)
@@ -135,7 +149,7 @@ class Tree:
             # estoy en un nodo value
             # en el checkeo de profundidad tengo que tener en cuenta que si no fuerzo aca, voy a tener
             # un nodo atributo y sus nodos valores (2 niveles de profundidad) mas
-            force_classification = (self.max_depth - 2 < current_depth or len(data_set.index) < self.min_elements_for_fork)
+            force_classification = (self.max_build_depth - 2 < current_depth or len(data_set.index) < self.min_elements_for_fork or self.nodes+1 >= self.max_nodes)
             classified, class_value = self.can_classify(data_set, force_classification)
             if not classified:
                 curr_node.add_child(self.build_tree(None, data_set, current_depth+1))
