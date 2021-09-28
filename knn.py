@@ -1,11 +1,12 @@
 import math
 
-
-def euclidian_distance(x1, x2):
-    eucl_distance = 0
-    for i in range(len(x1)):
-        eucl_distance += (x1[i] - x2[i]) ** 2
-    return math.sqrt(eucl_distance)
+def euclidean_distance_from(x1):
+    def euclidean_distance(x2):
+        distance = 0
+        for i in range(len(x1)):
+            distance += (x1[i] - x2[i]) ** 2
+        return math.sqrt(distance)
+    return euclidean_distance
 
 
 class knn:
@@ -16,6 +17,6 @@ class knn:
         self.classes = classes
         self.k = 5
 
-    def classify(self, data):
-        distances = list(map(euclidian_distance(data, self.x), self.f_X))
+    # def classify(self, data):
+    #     distances = list(map(euclidian_distance(data, self.x), self.f_X))
 
