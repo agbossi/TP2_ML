@@ -5,6 +5,22 @@ from Metrics import ConfusionMatrix
 
 from sklearn.model_selection import train_test_split
 
+
+def print_confusion_matrix(confusion_matrix):
+    confusion_matrix.summarize()
+    confusion_matrix.print_confusion_matrix()
+    print('s')
+    print(confusion_matrix.get_s())
+    print('recalls')
+    print(confusion_matrix.get_recalls())
+    print('precisions')
+    print(confusion_matrix.get_precisions())
+    print('accuracies')
+    print(confusion_matrix.get_accuracies())
+    print('f1')
+    print(confusion_matrix.get_f1_scores())
+
+
 relevant = ['wordcount', 'titleSentiment', 'sentimentValue', 'Star Rating']
 objective = ['Star Rating']
 features = ['wordcount', 'sentimentValue', 'titleSentiment']
@@ -89,15 +105,5 @@ print(classifications)
 confusion_matrix = ConfusionMatrix(['1', '2', '3', '4', '5'])
 for i in range(len(classifications)):
     confusion_matrix.add_entry(y_test[i]-1, classifications[i]-1)
-confusion_matrix.summarize()
-print('s')
-print(confusion_matrix.get_s())
-print('recalls')
-print(confusion_matrix.get_recalls())
-print('precisions')
-print(confusion_matrix.get_precisions())
-print('accuracies')
-print(confusion_matrix.get_accuracies())
-print('f1')
-print(confusion_matrix.get_f1_scores())
+print_confusion_matrix(confusion_matrix)
 

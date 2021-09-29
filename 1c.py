@@ -22,10 +22,11 @@ def print_confusion_matrix(confusion_matrix):
 
 
 def get_forest_confusion_matrix(forest, test_set):
-    votes_p, votes_n = 0, 0
     confusion_matrix = ConfusionMatrix([0, 1])
     class_col = forest[0].get_class_column()
-    for test_element in test_set:
+    for i in range(len(test_set)):
+        test_element = test_set.iloc[i, :]
+        votes_p, votes_n = 0, 0
         for tree in forest:
             classification = tree.traverse_tree(tree.root, test_element, Tree.INITIAL_DEPTH)
             if classification == 1:

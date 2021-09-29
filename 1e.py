@@ -8,6 +8,26 @@ from Metrics import ConfusionMatrix
 from Data_resamplers import train_test_split
 
 
+def get_forest_confusion_matrix(forest, test_set):
+    confusion_matrix = ConfusionMatrix([0, 1])
+    class_col = forest[0].get_class_column()
+    for i in range(len(test_set)):
+        test_element = test_set.iloc[i, :]
+        votes_p, votes_n = 0, 0
+        for tree in forest:
+            classification = tree.traverse_tree(tree.root, test_element, Tree.INITIAL_DEPTH)
+            if classification == 1:
+                votes_p += 1
+            else:
+                votes_n += 1
+
+        forest_classification = 0
+        if votes_p > votes_n:
+            forest_classification = 1
+        confusion_matrix.add_entry(test_element.loc[class_col], forest_classification)
+    return confusion_matrix
+
+
 def get_tree_confusion_matrix(tree, test_set, height=sys.maxsize):
     classifications = tree.test(test_set, height)
     confusion_matrix = ConfusionMatrix([0, 1])

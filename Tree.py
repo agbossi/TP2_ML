@@ -104,7 +104,7 @@ class Tree:
             for child in curr_node.children:
                 if child.value == element_value:
                     return self.traverse_tree(child, element, current_depth+1)
-            raise Exception("training set does not have value ", element_value, " for attribute ", curr_node.value)
+            raise Exception("data set does not have value ", element_value, " for attribute ", curr_node.value)
         else:
             # nodo de tipo value, solo puede tener como hijo a un siguiente attr
             #if current_depth > self.max_test_depth - 1:
