@@ -10,7 +10,7 @@ df = pd.read_csv(path)
 training_percent = 0.7
 sets = train_test_split(df, training_percent)[0]
 decision_tree = Tree()
-decision_tree.train(data_set=sets[0], min_elements_for_fork=25, max_depth=7)
+decision_tree.train(data_set=sets[0])
 
 classifications = decision_tree.test(sets[1])
 confusion_matrix = ConfusionMatrix([0, 1])

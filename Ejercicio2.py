@@ -76,18 +76,19 @@ def classify_element(training, test_element, kay, is_weighted):
 
 
 classify(list_train, list_test, 5, 1)
-print(y_test)
 print(" ")
 print(" ")
 print(" ")
 classify(list_train, list_test, 5, 0)
+print('y_test')
 print(y_test)
 
 classifications = classify(list_train, list_test, 5, 1)
+print('classifications')
+print(classifications)
 confusion_matrix = ConfusionMatrix(['1', '2', '3', '4', '5'])
 for i in range(len(classifications)):
-    if classifications[i] is not None:
-        confusion_matrix.add_entry(y_test[i], classifications[i])
+    confusion_matrix.add_entry(y_test[i]-1, classifications[i]-1)
 confusion_matrix.summarize()
 print('s')
 print(confusion_matrix.get_all_s())
