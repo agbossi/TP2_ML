@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import math
 from Metrics import ConfusionMatrix
 
 from sklearn.model_selection import train_test_split
@@ -37,37 +38,50 @@ list_train = list(zip(X_train, y_train))
 list_test = list(zip(X_test, y_test))
 
 
-def classify(training, test, kay, weight):
+def weight_func(distance, is_weighted):
+    if is_weighted:
+        return 1/(distance ** 2) if distance != 0 else math.inf
+    else:
+        return 1
+
+
+def classify(training, test, kay, is_weighted):
     output = []
     for o in range(len(test)):
-        winner = classify_element(list_train, test[o][0], kay, weight)
+        winner = classify_element(list_train, test[o][0], kay, is_weighted)
         s = 1
         while len(winner) > 1:
-            print(winner)
-            winner = classify_element(list_train, test[o][0], kay + s, weight)
+            winner = classify_element(list_train, test[o][0], kay + s, is_weighted)
             s = s + 1
-            print(s)
         output.append(winner[0])
     return output
 
 
-def classify_element(training, test_element, kay, weight):
+def classify_element(training, test_element, kay, is_weighted):
     results = {}
     for k in range(len(training)):
         dist = np.linalg.norm(training[k][0] - test_element)
         results[dist] = training[k][1]
     results = sorted(results.items())
-    # print(results)
     results = results[:kay]
     values = [item[1] for item in results]
-    ret = np.zeros(5)
-    # print(values)
+    distances = [item[0] for item in results]
+    ret = np.zeros(6)
     for s in range(len(values)):
-        ret[values[s]] += weight
+        ret[values[s]] += weight_func(distances[s], is_weighted)
     max_value = np.max(ret)
     winner = np.where(ret == max_value)[0]
     return winner
 
+
+
+classify(list_train, list_test, 5, 1)
+print(y_test)
+print(" ")
+print(" ")
+print(" ")
+classify(list_train, list_test, 5, 0)
+print(y_test)
 
 classifications = classify(list_train, list_test, 5, 1)
 confusion_matrix = ConfusionMatrix(['1', '2', '3', '4', '5'])
@@ -85,3 +99,4 @@ print('accuracies')
 confusion_matrix.get_accuracies()
 print('f1')
 confusion_matrix.get_f1_scores()
+
