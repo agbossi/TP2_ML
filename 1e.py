@@ -17,25 +17,6 @@ def get_tree_confusion_matrix(tree, test_set, height=sys.maxsize):
     return confusion_matrix
 
 
-def get_forest_confusion_matrix(forest, test_set):
-    votes_p, votes_n = 0, 0
-    confusion_matrix = ConfusionMatrix([0, 1])
-    class_col = forest[0].get_class_column()
-    for test_element in test_set:
-        for tree in forest:
-            classification = tree.traverse_tree(tree.root, test_element, Tree.INITIAL_DEPTH)
-            if classification == 1:
-                votes_p += 1
-            else:
-                votes_n += 1
-
-        forest_classification = 0
-        if votes_p > votes_n:
-            forest_classification = 1
-        confusion_matrix.add_entry(test_element.loc[class_col], forest_classification)
-    return confusion_matrix
-
-
 def get_precision_points(tree, train, test):
     x_points = list(range(tree.get_tree_depth() + 1))
     y_points_test = []
