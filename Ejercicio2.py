@@ -1,10 +1,7 @@
 import numpy as np
 import pandas as pd
-<<<<<<< HEAD
 import math
-=======
 from Metrics import ConfusionMatrix
->>>>>>> cb2740f8f76fb585c6027370e3c4ef7ba3c944d1
 
 from sklearn.model_selection import train_test_split
 
