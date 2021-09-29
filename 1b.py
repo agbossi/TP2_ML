@@ -9,7 +9,7 @@ def print_confusion_matrix(confusion_matrix):
     confusion_matrix.summarize()
     confusion_matrix.print_confusion_matrix()
     print('s')
-    print(confusion_matrix.get_all_s())
+    print(confusion_matrix.get_s())
     print('recalls')
     print(confusion_matrix.get_recalls())
     print('precisions')

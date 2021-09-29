@@ -20,10 +20,13 @@ class ConfusionMatrix:
         self.stats_matrix = None
         self.classifications = possible_classifications
         self.entries = 0
+        self.correct_entries = 0
 
     def add_entry(self, real_classification, classification):
         self.matrix[real_classification][classification] += 1
         self.entries += 1
+        if real_classification == classification:
+            self.correct_entries += 1
 
     def get_matrix_sum(self, elem_index):
         accum = 0
@@ -164,23 +167,8 @@ class ConfusionMatrix:
     def get_summary(self):
         return self.stats_matrix
 
-    def get_all_s(self):
-        if self.stats_matrix is None:
-            self.summarize()
-        ss = []
-        for i in range(len(self.classifications)):
-            s = [self.classifications[i], self.get_s(i)]  # paso la linea con texto
-            ss.append(s)
-        return ss
-
-    def get_s(self, index):
-        if self.stats_matrix is None:
-            self.summarize()
-        return self.stats_matrix[index][MatrixComponents.true_positive.value] / \
-               (self.stats_matrix[index][MatrixComponents.true_positive.value]
-                + self.stats_matrix[index][MatrixComponents.false_positive.value]
-                + self.stats_matrix[index][MatrixComponents.false_negative.value]
-                + self.stats_matrix[index][MatrixComponents.true_negative.value])
+    def get_s(self):
+        return str(self.correct_entries/self.entries * 100) + '%'
 
 
 POSITIVE = 0

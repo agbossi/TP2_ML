@@ -91,7 +91,7 @@ for i in range(len(classifications)):
     confusion_matrix.add_entry(y_test[i]-1, classifications[i]-1)
 confusion_matrix.summarize()
 print('s')
-print(confusion_matrix.get_all_s())
+print(confusion_matrix.get_s())
 print('recalls')
 print(confusion_matrix.get_recalls())
 print('precisions')
