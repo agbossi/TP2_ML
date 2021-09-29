@@ -1,6 +1,10 @@
 import numpy as np
 import pandas as pd
+<<<<<<< HEAD
 import math
+=======
+from Metrics import ConfusionMatrix
+>>>>>>> cb2740f8f76fb585c6027370e3c4ef7ba3c944d1
 
 from sklearn.model_selection import train_test_split
 
@@ -53,7 +57,7 @@ def classify(training, test, kay, is_weighted):
             winner = classify_element(list_train, test[o][0], kay + s, is_weighted)
             s = s + 1
         output.append(winner[0])
-    print(np.array(output))
+    return output
 
 
 def classify_element(training, test_element, kay, is_weighted):
@@ -73,6 +77,7 @@ def classify_element(training, test_element, kay, is_weighted):
     return winner
 
 
+
 classify(list_train, list_test, 5, 1)
 print(y_test)
 print(" ")
@@ -80,3 +85,18 @@ print(" ")
 print(" ")
 classify(list_train, list_test, 5, 0)
 print(y_test)
+
+classifications = classify(list_train, list_test, 5, 1)
+confusion_matrix = ConfusionMatrix(['1', '2', '3', '4', '5'])
+for i in range(len(classifications)):
+    confusion_matrix.add_entry(y_test[i], classifications[i])
+confusion_matrix.summarize()
+print('recalls')
+confusion_matrix.get_recalls()
+print('precisions')
+confusion_matrix.get_precisions()
+print('accuracies')
+confusion_matrix.get_accuracies()
+print('f1')
+confusion_matrix.get_f1_scores()
+
