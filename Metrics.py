@@ -168,7 +168,7 @@ class ConfusionMatrix:
         return self.stats_matrix
 
     def get_s(self):
-        return str(self.correct_entries/self.entries * 100) + '%'
+        return str(self.correct_entries/self.entries * 100)
 
 
 POSITIVE = 0

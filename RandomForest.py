@@ -15,6 +15,13 @@ def random_forest(data_set, sample_size, num_trees, max_depth=sys.maxsize, min_e
     return forest
 
 
+def avg_height(forest):
+    avg = 0
+    for tree in forest:
+        avg += tree.get_node_amount()
+    return avg / len(forest)
+
+
 def get_sample2(data_set, sample_size):
     sample = []
     for i in range(sample_size):

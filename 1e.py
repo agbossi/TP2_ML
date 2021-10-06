@@ -1,8 +1,7 @@
 import os
-import sys
 import matplotlib.pyplot as plt
 import pandas as pd
-import Tree
+from Tree import Tree
 import RandomForest as rf
 from Metrics import ConfusionMatrix
 from Data_resamplers import train_test_split
@@ -28,42 +27,50 @@ def get_forest_confusion_matrix(forest, test_set):
     return confusion_matrix
 
 
-def get_tree_confusion_matrix(tree, test_set, height=sys.maxsize):
-    classifications = tree.test(test_set, height)
+def get_tree_confusion_matrix(tree, test_set):
+    classifications = tree.test(test_set)
     confusion_matrix = ConfusionMatrix([0, 1])
     for elem_index, classification in classifications.items():
-        real_classification = test_set.loc[elem_index, tree.get_class_column()]
+        real_classification = test_set.iloc[1, :][tree.get_class_column()]
         confusion_matrix.add_entry(real_classification, classification)
     return confusion_matrix
 
 
-def get_precision_points(tree, train, test):
-    x_points = list(range(tree.get_tree_depth() + 1))
+def get_precision_points(tree, train, test, heights):
+    x_points = []
     y_points_test = []
     y_points_train = []
-    for height in x_points:
-        conf_matrix = get_tree_confusion_matrix(tree, train, height)
+    for height in range(1, heights+1):
+        tree.train(data_set=train, max_depth=height, min_elements_for_fork=3)
+        x_points.append(tree.get_node_amount())
+
+        conf_matrix = get_tree_confusion_matrix(tree, train)
         y_points_train.append(conf_matrix.get_s())
 
-        conf_matrix = get_tree_confusion_matrix(tree, test, height)
+        conf_matrix = get_tree_confusion_matrix(tree, test)
         y_points_test.append(conf_matrix.get_s())
     return x_points, y_points_train, y_points_test
 
 
-def get_forest_precision_points(forest, training_set, test_set):
-    x_points = list(range(1, len(forest) + 1))
+def get_forest_precision_points(training_set, test_set, heights, num_trees):
+    x_points = []
     y_train_f, y_test_f = [], []
-    for num_trees in x_points:
-        matrix = get_forest_confusion_matrix(forest[0:num_trees], test_set)
+    for height in range(1, heights+1):
+        forest = rf.random_forest(training_set, sample_size, num_trees, max_depth=height, min_elements_for_fork=3)
+        x_points.append(int(rf.avg_height(forest)))
+
+        matrix = get_forest_confusion_matrix(forest, test_set)
         y_test_f.append(matrix.get_s())
-        matrix = get_forest_confusion_matrix(forest[0:num_trees], training_set)
+
+        matrix = get_forest_confusion_matrix(forest, training_set)
         y_train_f.append(matrix.get_s())
+
     return x_points, y_train_f, y_test_f
 
 
-def plot_precision(forest, training_set, test_set):
-    x_points_f, y_train_f, y_test_f = get_forest_precision_points(forest, training_set, test_set)
-    x_points, y_train, y_test = get_precision_points(forest[0], training_set, test_set)
+def plot_precision(tree, training_set, test_set, num_trees, heights):
+    x_points_f, y_train_f, y_test_f = get_forest_precision_points(training_set, test_set, heights, num_trees)
+    x_points, y_train, y_test = get_precision_points(tree, training_set, test_set, heights)
 
     fig1, ax1 = plt.subplots()
     plt.ylim(0.5, 1.0)
@@ -86,8 +93,9 @@ df = pd.read_csv(path)
 training_percent = 0.7
 sets = train_test_split(df, training_percent)[0]
 
-num_trees = 40
-sample_size = 500
+heights = 3
+num_trees = 3
+sample_size = 10
 training_percent = 0.7
-forest = rf.random_forest(sets[0], sample_size, num_trees)
-plot_precision(forest, sets[0], sets[1])
+tree = Tree()
+plot_precision(tree, sets[0], sets[1], num_trees, heights)

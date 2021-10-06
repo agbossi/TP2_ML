@@ -2,8 +2,7 @@ import enum
 import math
 import sys
 
-INITIAL_DEPTH = 0
-
+INITIAL_DEPTH = 1
 
 def entropy(data_set):
     entropy = 0
@@ -30,10 +29,12 @@ class NodeType(enum.Enum):
 # (estos se sacan a través de otra función)
 class Node:
 
-    def __init__(self, node_type, value):
+    def __init__(self, node_type, value, data=None):
         self.nodeType = node_type
         self.value = value
         self.children = []  # Son los hijos del nodo en concreto con el que estoy trabajando
+        # para los nodos clasificacion
+        self.data = data
 
     # Función que agrega un hijo al nodo actual siempre y cuando los mismos no tengan igual nodeType y
     # sabiendo que un valor
@@ -48,9 +49,10 @@ class Node:
 # clase que me genera un arbol el cual parte una raíz
 class Tree:
 
+    INITIAL_DEPTH = 1
+
     def __init__(self):
         self.variables = None
-        self.filters = {}
         # diccionario con todos los attr disponibles y sus valores posible ({attr -> [values] })
         self.attribute_dictionary = None
         self.training_set = None
@@ -62,6 +64,7 @@ class Tree:
         self.min_elements_for_fork = None
         self.max_nodes = None
         self.nodes = 0
+        self.leaves = []
 
     def get_class_column(self):
         return self.class_column
@@ -84,6 +87,7 @@ class Tree:
         self.class_column = data_set.columns[-1]
         self.attribute_dictionary = self.build_attr_dict()
         self.max_nodes = max_nodes
+        self.root = None
         self.root = self.build_tree(self.root, self.training_set, INITIAL_DEPTH)
 
     # {elem-index -> class} y test_elem[-1] como clase real por otro
@@ -104,7 +108,7 @@ class Tree:
             for child in curr_node.children:
                 if child.value == element_value:
                     return self.traverse_tree(child, element, current_depth+1)
-            raise Exception("data set does not have value ", element_value, " for attribute ", curr_node.value)
+            return None
         else:
             # nodo de tipo value, solo puede tener como hijo a un siguiente attr
             #if current_depth > self.max_test_depth - 1:
@@ -136,27 +140,34 @@ class Tree:
             if next_attr is not None:
                 curr_node = self.build_attribute_sub_tree(next_attr)
                 # este atributo ya fue usado
+                attr_values = self.attribute_dictionary[next_attr]
                 del self.attribute_dictionary[next_attr]
                 # curr_node es un nodo atributo con sus values como nodos hijos
                 for node in curr_node.children:
                     self.build_tree(node, data_set[(data_set[next_attr] == node.value)], current_depth+1)
+                self.attribute_dictionary[next_attr] = attr_values
             else:
                 # ya use todos los atributos
-                classified, class_value = self.can_classify(data_set, force_classification=True)
-                self.nodes += 1
-                return Node(NodeType.classification, class_value)
+                classified, class_value, frequency_dict = self.can_classify(data_set, force_classification=True)
+                leaf = Node(NodeType.classification, class_value, data=frequency_dict)
+                if class_value is not None:
+                    self.nodes += 1
+                    self.leaves.append(leaf)
+                return leaf
         else:
             # estoy en un nodo value
             # en el checkeo de profundidad tengo que tener en cuenta que si no fuerzo aca, voy a tener
             # un nodo atributo y sus nodos valores (2 niveles de profundidad) mas
-            force_classification = (self.max_build_depth - 2 < current_depth or len(data_set.index) < self.min_elements_for_fork or self.nodes+1 >= self.max_nodes)
-            classified, class_value = self.can_classify(data_set, force_classification)
+            force_classification = (self.max_build_depth - 2 <= current_depth or len(data_set.index) < self.min_elements_for_fork or self.nodes+1 >= self.max_nodes)
+            classified, class_value, frequency_dict = self.can_classify(data_set, force_classification)
             if not classified:
                 curr_node.add_child(self.build_tree(None, data_set, current_depth+1))
             else:
-                curr_node.add_child(Node(NodeType.classification, class_value))
-                self.nodes += 1
-
+                leaf = Node(NodeType.classification, class_value, data=frequency_dict)
+                if class_value is not None:
+                    self.leaves.append(leaf)
+                    self.nodes += 1
+                curr_node.add_child(leaf)
         return curr_node
 
     def build_attribute_sub_tree(self, attribute):
@@ -172,7 +183,7 @@ class Tree:
         frequency_dict = data_set[self.class_column].value_counts().to_dict()
         if len(frequency_dict) == 1:
             # todos los ejemplos son de la misma clase, estoy en condiciones de clasificar
-            return True, list(frequency_dict.keys())[0]  # la unica clase
+            return True, list(frequency_dict.keys())[0], frequency_dict  # la unica clase
         elif force_classification:
             # si por poda necesito devolver una clasificacion si o si
             max_v = 0
@@ -181,8 +192,8 @@ class Tree:
                 if max_v < v:
                     classification = k
                     max_v = v
-            return True, classification
+            return True, classification, frequency_dict
         else:
             # no clasifique, entonces no devuelvo nada
-            return False, None
+            return False, None, None
 

@@ -40,41 +40,23 @@ df.loc[(df['Duration of Credit (month)'] >= 24) & (df['Duration of Credit (month
 # de (28 a 75]
 df.loc[(df['Duration of Credit (month)'] >= 28) & (df['Duration of Credit (month)'] <= 75), 'Duration of Credit (month)'] = 4
 
-# de [0 a 23]
-df.loc[(df['Age (years)'] >= 0) & (df['Age (years)'] <= 23), 'Age (years)'] = 0
-# de [24 a 26]
-df.loc[(df['Age (years)'] >= 24) & (df['Age (years)'] <= 26), 'Age (years)'] = 1
-# de [27 a 28]
-df.loc[(df['Age (years)'] >= 27) & (df['Age (years)'] <= 28), 'Age (years)'] = 2
-# de [29 a 32]
-df.loc[(df['Age (years)'] >= 29) & (df['Age (years)'] <= 32), 'Age (years)'] = 3
-# de [33 a 35]
-df.loc[(df['Age (years)'] >= 33) & (df['Age (years)'] <= 35), 'Age (years)'] = 4
-# de [36 a 38]
-df.loc[(df['Age (years)'] >= 36) & (df['Age (years)'] <= 38), 'Age (years)'] = 5
-# de [39 a 42]
-df.loc[(df['Age (years)'] >= 39) & (df['Age (years)'] <= 42), 'Age (years)'] = 6
-# de [43 a 48]
-df.loc[(df['Age (years)'] >= 43) & (df['Age (years)'] <= 48), 'Age (years)'] = 7
-# de [49 a 75]
-df.loc[(df['Age (years)'] >= 49) & (df['Age (years)'] <= 75), 'Age (years)'] = 8
+# de [0 a 26]
+df.loc[(df['Age (years)'] >= 0) & (df['Age (years)'] <= 26), 'Age (years)'] = 0
+# de [27 a 32]
+df.loc[(df['Age (years)'] >= 27) & (df['Age (years)'] <= 32), 'Age (years)'] = 1
+# de [33 a 42]
+df.loc[(df['Age (years)'] >= 33) & (df['Age (years)'] <= 42), 'Age (years)'] = 2
+# de [43 a 75]
+df.loc[(df['Age (years)'] >= 43) & (df['Age (years)'] <= 75), 'Age (years)'] = 3
 
-# de [0 a 1000)
-df.loc[(df['Credit Amount'] >= 0) & (df['Credit Amount'] < 1000), 'Credit Amount'] = 0
-# de [1000 a 1500)
-df.loc[(df['Credit Amount'] >= 1000) & (df['Credit Amount'] < 1500), 'Credit Amount'] = 1
-# de [1500 a 2000)
-df.loc[(df['Credit Amount'] >= 1500) & (df['Credit Amount'] < 2000), 'Credit Amount'] = 2
-# de [2000 a 2500)
-df.loc[(df['Credit Amount'] >= 2000) & (df['Credit Amount'] < 2500), 'Credit Amount'] = 3
-# de [2500 a 3000)
-df.loc[(df['Credit Amount'] >= 2500) & (df['Credit Amount'] < 3000), 'Credit Amount'] = 4
-# de [3000 a 4000)
-df.loc[(df['Credit Amount'] >= 3000) & (df['Credit Amount'] < 4000), 'Credit Amount'] = 5
-# de [4000 a 7000)
-df.loc[(df['Credit Amount'] >= 4000) & (df['Credit Amount'] < 6500), 'Credit Amount'] = 6
-# de [7000 a inf)
-df.loc[df['Credit Amount'] >= 6500, 'Credit Amount'] = 7
+
+# de [0 a 1500)
+df.loc[(df['Credit Amount'] >= 0) & (df['Credit Amount'] < 1500), 'Credit Amount'] = 0
+# de [1500 a 3000)
+df.loc[(df['Credit Amount'] >= 1500) & (df['Credit Amount'] < 3000), 'Credit Amount'] = 1
+# de [3000 a inf)
+df.loc[df['Credit Amount'] >= 3000, 'Credit Amount'] = 2
+
 
 df.to_csv('german_credit_adjusted.csv', index=False)
 

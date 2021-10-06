@@ -29,10 +29,11 @@ def get_forest_confusion_matrix(forest, test_set):
         votes_p, votes_n = 0, 0
         for tree in forest:
             classification = tree.traverse_tree(tree.root, test_element, Tree.INITIAL_DEPTH)
-            if classification == 1:
-                votes_p += 1
-            else:
-                votes_n += 1
+            if classification is not None:
+                if classification == 1:
+                    votes_p += 1
+                else:
+                    votes_n += 1
 
         forest_classification = 0
         if votes_p > votes_n:
@@ -46,8 +47,14 @@ df = pd.read_csv(path)
 
 training_percent = 0.7
 sets = train_test_split(df, training_percent)[0]
-num_trees = 3
+num_trees = 15
 sample_size = 300
-forest = rf.random_forest(sets[0], sample_size, num_trees)
+max_depth = 9
+max_nodes = 1
+min_elements_for_fork = sample_size * 0.025
+# , max_depth=max_depth, min_elements_for_fork=min_elements_for_fork
+forest = rf.random_forest(sets[0], sample_size, num_trees=num_trees,
+                          max_depth=max_depth, min_elements_for_fork=min_elements_for_fork)
+
 conf_matrix = get_forest_confusion_matrix(forest, sets[1])
 print_confusion_matrix(conf_matrix)
